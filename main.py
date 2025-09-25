@@ -66,7 +66,7 @@ def predict():
         return jsonify({'error': f'Error al procesar la imagen: {str(e)}'}), 500
 
 def main():
-    app.run(port=int(os.environ.get('PORT', 80)))
+    app.run(port=int(os.environ.get('PORT', 8080)))
 
 if __name__ == "__main__":
     main()
