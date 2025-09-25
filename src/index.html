@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Análisis y Demo | MNIST AI</title>
-    
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
     <!-- SDKs de Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -13,7 +18,8 @@
     <!-- Plotly -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
-    <link rel="stylesheet" href="/static/decoracion.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='decoracion.css') }}">
 
 </head>
 <body>
@@ -26,7 +32,7 @@
         <main>
             <!-- SECCIÓN DE PREDICCIÓN INTERACTIVA CON FIREBASE -->
             <section class="card prediction-section">
-                <h2>¡Prueba la IA y Guarda el Resultado!</h2>
+                <h2>¡Prueba la IA en tiempo real!</h2>
                 <p>Sube una imagen de un número manuscrito. La IA predecirá el dígito y podrás guardar la imagen y el resultado en Firebase.</p>
                 <div id="upload-area" class="upload-area">
                     <p>Haz clic aquí o arrastra una imagen</p>
@@ -41,7 +47,7 @@
 
             <!-- GRÁFICAS DE PLOTLY -->
             <section class="card">
-                <h2>Rendimiento del Modelo: Precisión y Pérdida</h2>
+                <h2>Rendimiento del Modelo</h2>
                 <p>Las siguientes gráficas muestran la evolución del modelo durante el entrenamiento, evidenciando el sobreajuste (overfitting).</p>
                 <div class="grid">
                     <div id="accuracy-chart"></div>
@@ -99,12 +105,31 @@
         const storage = firebase.storage();
         const db = firebase.firestore();
 
-        // --- 2. RENDERIZADO DE GRÁFICOS PLOTLY ---
+        // --- 2. RENDERIZADO DE GRÁFICOS PLOTLY (con tema oscuro) ---
+        function applyDarkTheme(figure) {
+            if (!figure.layout) figure.layout = {};
+            figure.layout.plot_bgcolor = '#1E293B';
+            figure.layout.paper_bgcolor = '#1E293B';
+            figure.layout.font = { color: '#E2E8F0' };
+            figure.layout.xaxis = figure.layout.xaxis || {};
+            figure.layout.yaxis = figure.layout.yaxis || {};
+            figure.layout.xaxis.gridcolor = '#334155';
+            figure.layout.yaxis.gridcolor = '#334155';
+             figure.layout.xaxis.linecolor = '#334155';
+            figure.layout.yaxis.linecolor = '#334155';
+            return figure;
+        }
+
         try {
-            const graphsData = {{ graphs_json | tojson_safe }};
-            Plotly.newPlot('accuracy-chart', graphsData.accuracy.data, graphsData.accuracy.layout);
-            Plotly.newPlot('loss-chart', graphsData.loss.data, graphsData.loss.layout);
-            Plotly.newPlot('confusion-matrix-chart', graphsData.confusion_matrix.data, graphsData.confusion_matrix.layout);
+            let graphsData = {{ graphs_json | tojson_safe }};
+
+            let accuracyFigure = applyDarkTheme(graphsData.accuracy);
+            let lossFigure = applyDarkTheme(graphsData.loss);
+            let confusionMatrixFigure = applyDarkTheme(graphsData.confusion_matrix);
+
+            Plotly.newPlot('accuracy-chart', accuracyFigure.data, accuracyFigure.layout);
+            Plotly.newPlot('loss-chart', lossFigure.data, lossFigure.layout);
+            Plotly.newPlot('confusion-matrix-chart', confusionMatrixFigure.data, confusionMatrixFigure.layout);
         } catch (e) {
             console.error("Error al renderizar los gráficos de Plotly:", e);
         }
@@ -121,9 +146,16 @@
         let currentPrediction = null;
 
         uploadArea.addEventListener('click', () => imageUpload.click());
-        uploadArea.addEventListener('dragover', (e) => e.preventDefault());
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#38BDF8';
+        });
+        uploadArea.addEventListener('dragleave', (e) => {
+            uploadArea.style.borderColor = '#334155';
+        });
         uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
+            uploadArea.style.borderColor = '#334155';
             imageUpload.files = e.dataTransfer.files;
             handleImageUpload({ target: imageUpload });
         });

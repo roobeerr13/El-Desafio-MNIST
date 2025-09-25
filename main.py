@@ -1,12 +1,13 @@
+
 import os
 import json
 import numpy as np
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, url_for
 from tensorflow import keras
 from PIL import Image, ImageOps
 import io
 
-app = Flask(__name__, template_folder='src')
+app = Flask(__name__, template_folder='src', static_folder='src')
 
 # --- CARGA DEL MODELO Y CACHÉ ---
 # Cargamos el modelo una sola vez al inicio de la aplicación
@@ -70,7 +71,6 @@ def predict():
 
     except Exception as e:
         return jsonify({'error': f'Error al procesar la imagen: {str(e)}'}), 500
-
 
 def main():
     app.run(port=int(os.environ.get('PORT', 8080)))
