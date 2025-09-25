@@ -119,7 +119,8 @@
                 <h3>Arquitectura</h3>
                 <pre>{{ model_summary }}</pre>
                 <h3>Logs de Entrenamiento</h3>
-                <pre>{% for log in training_logs %}{{ log }}\n{% endfor %}</pre>
+                <pre>{% for log in training_logs %}{{ log }}
+{% endfor %}</pre>
             </section>
         </main>
     </div>
@@ -143,7 +144,7 @@
 
         // --- 2. RENDERIZADO DE GRÁFICOS PLOTLY ---
         try {
-            const graphsData = JSON.parse({{ graphs_json | tojson_safe }});
+            const graphsData = {{ graphs_json | tojson_safe }};
             Plotly.newPlot('accuracy-chart', graphsData.accuracy.data, graphsData.accuracy.layout);
             Plotly.newPlot('loss-chart', graphsData.loss.data, graphsData.loss.layout);
             Plotly.newPlot('confusion-matrix-chart', graphsData.confusion_matrix.data, graphsData.confusion_matrix.layout);
