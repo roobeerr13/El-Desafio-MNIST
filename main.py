@@ -14,8 +14,11 @@ model = keras.models.load_model('mnist_model.h5')
 
 # Función para cargar los resultados de la caché de entrenamiento
 def load_cached_results():
-    with open('src/training_cache.json', 'r') as f:
-        return json.load(f)
+    try:
+        with open('src/training_cache.json', 'r') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return None
 
 # Filtro personalizado para serializar a JSON en la plantilla
 @app.template_filter('tojson_safe')
@@ -26,14 +29,17 @@ def tojson_safe_filter(obj):
 
 @app.route("/")
 def index():
-    # Carga los datos de los gráficos y los muestra como antes
     cached_results = load_cached_results()
+    if cached_results is None:
+        return "<h2>Error: training_cache.json not found or is invalid.</h2><p>Please run the following command in your terminal to generate the necessary data:</p><pre>python precompute_results.py</pre>"
+    
     return render_template('index.html', 
                            model_summary=cached_results['model_summary'], 
                            training_logs=cached_results['training_logs'], 
                            final_accuracy=cached_results['final_accuracy'],
                            graphs_json=cached_results['graphs_json'],
                            sample_images=cached_results['sample_images'])
+
 
 @app.route("/predict", methods=['POST'])
 def predict():
@@ -64,6 +70,7 @@ def predict():
 
     except Exception as e:
         return jsonify({'error': f'Error al procesar la imagen: {str(e)}'}), 500
+
 
 def main():
     app.run(port=int(os.environ.get('PORT', 8080)))
