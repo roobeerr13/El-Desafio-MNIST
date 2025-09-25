@@ -2,7 +2,7 @@
 import os
 import json
 import numpy as np
-from flask import Flask, render_template, request, jsonify, url_for
+from flask import Flask, render_template, request, jsonify
 from tensorflow import keras
 
 # Importamos la nueva función de procesamiento de imágenes
@@ -21,11 +21,6 @@ def load_cached_results():
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         return None
-
-# Filtro personalizado para serializar a JSON en la plantilla
-@app.template_filter('tojson_safe')
-def tojson_safe_filter(obj):
-    return json.dumps(obj)
 
 # --- RUTAS DE LA APLICACIÓN ---
 

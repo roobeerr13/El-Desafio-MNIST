@@ -90,6 +90,7 @@
     </div>
 
     <script>
+    document.addEventListener('DOMContentLoaded', function() {
         // --- 1. INICIALIZACIÓN DE FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyCIEnLMa3UQCCw6AMySmdHB1dACS057OqU",
@@ -116,25 +117,27 @@
             figure.layout.yaxis = figure.layout.yaxis || {};
             figure.layout.xaxis.gridcolor = '#334155';
             figure.layout.yaxis.gridcolor = '#334155';
-             figure.layout.xaxis.linecolor = '#334155';
+            figure.layout.xaxis.linecolor = '#334155';
             figure.layout.yaxis.linecolor = '#334155';
             return figure;
         }
 
         try {
-            let graphsData = {{ graphs_json | tojson_safe }};
-
+            // CORRECTO: Usamos el filtro `tojson` para inyectar los datos de forma segura.
+            let graphsData = {{ graphs_json | tojson }};
+            
             let accuracyFigure = applyDarkTheme(graphsData.accuracy);
             let lossFigure = applyDarkTheme(graphsData.loss);
             let confusionMatrixFigure = applyDarkTheme(graphsData.confusion_matrix);
 
-            Plotly.newPlot('accuracy-chart', accuracyFigure.data, accuracyFigure.layout);
-            Plotly.newPlot('loss-chart', lossFigure.data, lossFigure.layout);
-            Plotly.newPlot('confusion-matrix-chart', confusionMatrixFigure.data, confusionMatrixFigure.layout);
+            Plotly.newPlot('accuracy-chart', accuracyFigure.data, accuracyFigure.layout, {responsive: true});
+            Plotly.newPlot('loss-chart', lossFigure.data, lossFigure.layout, {responsive: true});
+            Plotly.newPlot('confusion-matrix-chart', confusionMatrixFigure.data, confusionMatrixFigure.layout, {responsive: true});
+
         } catch (e) {
             console.error("Error al renderizar los gráficos de Plotly:", e);
         }
-        
+
         // --- 3. LÓGICA DE PREDICCIÓN Y FIREBASE ---
         const uploadArea = document.getElementById('upload-area');
         const imageUpload = document.getElementById('image-upload');
@@ -143,95 +146,100 @@
         const saveButton = document.getElementById('save-button');
         const statusMessage = document.getElementById('status-message');
 
-        let currentFile = null;
-        let currentPrediction = null;
+        if (uploadArea) {
+            let currentFile = null;
+            let currentPrediction = null;
 
-        uploadArea.addEventListener('click', () => imageUpload.click());
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.style.borderColor = '#38BDF8';
-        });
-        uploadArea.addEventListener('dragleave', (e) => {
-            uploadArea.style.borderColor = '#334155';
-        });
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.style.borderColor = '#334155';
-            imageUpload.files = e.dataTransfer.files;
-            handleImageUpload({ target: imageUpload });
-        });
-        imageUpload.addEventListener('change', handleImageUpload);
-        saveButton.addEventListener('click', saveToFirebase);
-
-        async function handleImageUpload(event) {
-            currentFile = event.target.files[0];
-            if (!currentFile) return;
-
-            saveButton.disabled = true;
-            statusMessage.textContent = '';
-            
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                imagePreview.src = e.target.result;
-                imagePreview.style.display = 'block';
-            };
-            reader.readAsDataURL(currentFile);
-
-            const formData = new FormData();
-            formData.append('image', currentFile);
-            
-            predictionResult.textContent = 'Analizando...';
-
-            try {
-                const response = await fetch('/predict', { method: 'POST', body: formData });
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Error en la respuesta del servidor');
+            uploadArea.addEventListener('click', () => imageUpload.click());
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#38BDF8';
+            });
+            uploadArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#334155';
+            });
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = '#334155';
+                if (e.dataTransfer.files.length > 0) {
+                    imageUpload.files = e.dataTransfer.files;
+                    handleImageUpload({ target: imageUpload });
                 }
-                const data = await response.json();
-                currentPrediction = data.prediction;
-                predictionResult.textContent = currentPrediction;
-                saveButton.disabled = false; // Habilitar el botón de guardar
+            });
+            imageUpload.addEventListener('change', handleImageUpload);
+            saveButton.addEventListener('click', saveToFirebase);
 
-            } catch (error) {
-                console.error('Error en la predicción:', error);
-                predictionResult.textContent = 'Error';
-                statusMessage.textContent = `Error al predecir: ${error.message}`;
+            async function handleImageUpload(event) {
+                currentFile = event.target.files[0];
+                if (!currentFile) return;
+
+                saveButton.disabled = true;
+                statusMessage.textContent = '';
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                };
+                reader.readAsDataURL(currentFile);
+
+                const formData = new FormData();
+                formData.append('image', currentFile);
+
+                predictionResult.textContent = 'Analizando...';
+
+                try {
+                    const response = await fetch('/predict', { method: 'POST', body: formData });
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.error || 'Error en la respuesta del servidor');
+                    }
+                    const data = await response.json();
+                    currentPrediction = data.prediction;
+                    predictionResult.textContent = currentPrediction;
+                    saveButton.disabled = false; // Habilitar el botón de guardar
+
+                } catch (error) {
+                    console.error('Error en la predicción:', error);
+                    predictionResult.textContent = 'Error';
+                    statusMessage.textContent = `Error al predecir: ${error.message}`;
+                }
+            }
+
+            async function saveToFirebase() {
+                if (!currentFile || currentPrediction === null) {
+                    alert('Primero debes subir una imagen y obtener una predicción.');
+                    return;
+                }
+
+                saveButton.disabled = true;
+                statusMessage.textContent = 'Guardando en Firebase...';
+
+                try {
+                    // 1. Subir imagen a Firebase Storage
+                    const filePath = `uploads/${Date.now()}_${currentFile.name}`;
+                    const fileRef = storage.ref(filePath);
+                    const snapshot = await fileRef.put(currentFile);
+                    const downloadURL = await snapshot.ref.getDownloadURL();
+
+                    // 2. Guardar datos en Firestore
+                    await db.collection('predictions').add({
+                        image_url: downloadURL,
+                        predicted_digit: currentPrediction,
+                        created_at: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    statusMessage.textContent = '¡Resultado guardado en Firebase con éxito!';
+
+                } catch (error) {
+                    console.error('Error al guardar en Firebase:', error);
+                    statusMessage.textContent = `Error al guardar: ${error.message}`;
+                    saveButton.disabled = false;
+                }
             }
         }
-
-        async function saveToFirebase() {
-            if (!currentFile || currentPrediction === null) {
-                alert('Primero debes subir una imagen y obtener una predicción.');
-                return;
-            }
-
-            saveButton.disabled = true;
-            statusMessage.textContent = 'Guardando en Firebase...';
-
-            try {
-                // 1. Subir imagen a Firebase Storage
-                const filePath = `uploads/${Date.now()}_${currentFile.name}`;
-                const fileRef = storage.ref(filePath);
-                const snapshot = await fileRef.put(currentFile);
-                const downloadURL = await snapshot.ref.getDownloadURL();
-
-                // 2. Guardar datos en Firestore
-                await db.collection('predictions').add({
-                    image_url: downloadURL,
-                    predicted_digit: currentPrediction,
-                    created_at: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                statusMessage.textContent = '¡Resultado guardado en Firebase con éxito!';
-                console.log('Guardado exitoso!');
-
-            } catch (error) {
-                console.error('Error al guardar en Firebase:', error);
-                statusMessage.textContent = `Error al guardar: ${error.message}`;
-                saveButton.disabled = false;
-            }
-        }
+    });
     </script>
 </body>
 </html>
