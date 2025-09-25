@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -90,14 +91,14 @@
 
     <script>
         // --- 1. INICIALIZACIÓN DE FIREBASE ---
-        // TODO: Pega aquí tu objeto de configuración de Firebase
         const firebaseConfig = {
-            apiKey: "TU_API_KEY",
-            authDomain: "TU_AUTH_DOMAIN",
-            projectId: "TU_PROJECT_ID",
-            storageBucket: "TU_STORAGE_BUCKET",
-            messagingSenderId: "TU_MESSAGING_SENDER_ID",
-            appId: "TU_APP_ID"
+            apiKey: "AIzaSyCIEnLMa3UQCCw6AMySmdHB1dACS057OqU",
+            authDomain: "fir-data-bc4ad.firebaseapp.com",
+            projectId: "fir-data-bc4ad",
+            storageBucket: "fir-data-bc4ad.appspot.com",
+            messagingSenderId: "547852821097",
+            appId: "1:547852821097:web:360dda0f153de9a748f8f8",
+            measurementId: "G-YSKT7F8HTX"
         };
 
         // Inicializar Firebase
@@ -203,10 +204,6 @@
             if (!currentFile || currentPrediction === null) {
                 alert('Primero debes subir una imagen y obtener una predicción.');
                 return;
-            }
-            if (firebaseConfig.apiKey === "TU_API_KEY") {
-                 alert("Error: Debes configurar tus credenciales de Firebase en el archivo index.html");
-                 return;
             }
 
             saveButton.disabled = true;

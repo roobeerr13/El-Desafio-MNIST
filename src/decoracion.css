@@ -1,4 +1,13 @@
 
+@keyframes neon-glow {
+    0%, 100% {
+        text-shadow: 0 0 5px #38BDF8, 0 0 10px #38BDF8, 0 0 20px #0EA5E9;
+    }
+    50% {
+        text-shadow: 0 0 10px #38BDF8, 0 0 20px #0EA5E9, 0 0 40px #0EA5E9;
+    }
+}
+
 :root {
     --bg-dark: #0F172A;
     --bg-light: #1E293B;
@@ -8,6 +17,7 @@
     --accent-blue: #38BDF8;
     --accent-green: #34D399;
     --accent-red: #F87171;
+    --neon-blue-glow: 0 0 15px rgba(56, 189, 248, 0.5);
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --font-mono: 'Fira Code', 'SF Mono', monospace;
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -37,26 +47,44 @@ body {
     border-radius: 12px;
     padding: 2rem;
     margin-bottom: 2.5rem;
-    box-shadow: var(--shadow-lg);
-    transition: transform 0.2s ease-in-out;
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
+    transition: all 0.3s ease-in-out;
 }
 
 .card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 0 25px rgba(56, 189, 248, 0.3);
 }
 
-h1, h2 {
-    color: var(--text-primary);
+h1 {
+    font-size: 3rem;
+    color: #fff;
     font-weight: 700;
+    letter-spacing: -0.5px;
+    text-align: center;
+    animation: neon-glow 3s ease-in-out infinite;
+    border: none;
+    padding-bottom: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+h2 {
+    font-size: 2rem;
+    color: var(--accent-blue);
+    font-weight: 600;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 0.8rem;
     margin: 0 0 1.5rem 0;
-    letter-spacing: -0.5px;
+    text-shadow: 0 0 8px rgba(56, 189, 248, 0.7);
 }
 
-h1 { font-size: 2.5rem; }
-h2 { font-size: 2rem; margin-top: 1.5rem; }
-h3 { font-size: 1.25rem; color: var(--text-secondary); border: none; font-weight: 500; margin-bottom: 1rem; }
+h3 {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    border: none;
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
 
 p {
     margin: 0 0 1.5rem 0;
@@ -82,6 +110,7 @@ pre {
     font-weight: 600;
     margin: 2rem 0;
     color: var(--accent-blue);
+    box-shadow: var(--neon-blue-glow);
 }
 
 .grid {
@@ -168,6 +197,7 @@ pre {
     color: var(--accent-blue);
     margin-top: 1rem;
     min-height: 80px;
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.7);
 }
 
 .action-button {
@@ -181,16 +211,18 @@ pre {
     cursor: pointer;
     transition: all 0.2s;
     margin-top: 1.5rem;
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
 }
 .action-button:hover:not(:disabled) {
     background-color: #0EA5E9;
     transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 0 25px rgba(56, 189, 248, 0.6);
 }
 .action-button:disabled {
     background-color: #334155;
     color: #64748B;
     cursor: not-allowed;
+    box-shadow: none;
 }
 #status-message {
     font-size: 1rem;
@@ -206,7 +238,6 @@ pre {
 
 @media (max-width: 800px) {
     .grid { grid-template-columns: 1fr; }
-    h1 { font-size: 2rem; }
+    h1 { font-size: 2.5rem; }
     h2 { font-size: 1.75rem; }
 }
-
