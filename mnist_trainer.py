@@ -54,6 +54,9 @@ def train_and_evaluate():
     # Fase 4: Evaluación y Análisis de Resultados
     test_loss, test_acc = model.evaluate(x_test, y_test, verbose=0)
     final_accuracy = f'Precisión en el conjunto de prueba: {test_acc}'
+    
+    # Guardar el modelo
+    model.save('mnist_model.h5')
 
     # Visualización del Aprendizaje y guardado de los gráficos
     plt.figure(figsize=(12, 4))
