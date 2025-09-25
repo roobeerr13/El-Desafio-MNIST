@@ -4,8 +4,9 @@ import json
 import numpy as np
 from flask import Flask, render_template, request, jsonify, url_for
 from tensorflow import keras
-from PIL import Image, ImageOps
-import io
+
+# Importamos la nueva función de procesamiento de imágenes
+from src.image_processor import process_image
 
 app = Flask(__name__, template_folder='src', static_folder='src')
 
@@ -45,22 +46,13 @@ def index():
 @app.route("/predict", methods=['POST'])
 def predict():
     # 1. Recibir el archivo de imagen
-    file = request.files['image']
+    file = request.files.get('image')
     if not file:
         return jsonify({'error': 'No se recibió ninguna imagen.'}), 400
 
     try:
-        # 2. Procesar la imagen para que coincida con los datos de entrenamiento
-        image_bytes = file.read()
-        img = Image.open(io.BytesIO(image_bytes)).convert('L') # Abrir y convertir a escala de grises
-        img = ImageOps.invert(img) # Invertir colores (dígito blanco sobre fondo negro)
-        img = img.resize((28, 28)) # Redimensionar a 28x28 píxeles
-        
-        # Convertir a un array de numpy y normalizar
-        img_array = np.array(img).astype('float32') / 255.0
-        
-        # Aplanar la imagen de (28, 28) a (784,)
-        img_flattened = img_array.reshape(1, 784)
+        # 2. Procesar la imagen usando la función dedicada
+        img_flattened = process_image(file)
 
         # 3. Realizar la predicción con el modelo cargado
         prediction = model.predict(img_flattened)
@@ -70,6 +62,7 @@ def predict():
         return jsonify({'prediction': predicted_digit})
 
     except Exception as e:
+        print(f"[ERROR] An error occurred during prediction: {e}")
         return jsonify({'error': f'Error al procesar la imagen: {str(e)}'}), 500
 
 def main():
