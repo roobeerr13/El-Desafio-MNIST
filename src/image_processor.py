@@ -21,6 +21,7 @@ def process_image(image_file):
     
     # Convertir a un array de numpy y normalizar
     img_array = np.array(img).astype('float32') / 255.0
+    img_array = 1.0 - img_array
     
     # Aplanar la imagen para el modelo
     img_flattened = img_array.reshape(1, 784)
