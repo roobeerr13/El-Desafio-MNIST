@@ -5,6 +5,7 @@
   channel = "stable-24.05"; # or "unstable"
 
   # Use https://search.nixos.org/packages to find packages
+  # This is a comment to force the environment to reload.
   packages = [
     pkgs.python311
     pkgs.python311Packages.pip

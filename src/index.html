@@ -235,6 +235,17 @@
                     });
 
                     statusMessage.textContent = '¡Resultado guardado en Firebase con éxito!';
+                    currentFile = null;
+                    currentPrediction = null;
+                    
+                    setTimeout(() => {
+                       imagePreview.style.display = 'none';
+                       predictionResult.textContent = '...';
+                       statusMessage.textContent = '';
+                       uploadArea.style.borderColor = '#334155';
+                       saveButton.disabled = false;
+                    }, 3000);
+
 
                 } catch (error) {
                     console.error('Error al guardar en Firebase:', error);
