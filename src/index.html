@@ -20,7 +20,7 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='decoracion.css') }}">
+    <link rel="stylesheet" href="/src/decoracion.css">
 
 </head>
 <body>
@@ -30,62 +30,66 @@
             <p>Esta es una plataforma completa para analizar el rendimiento de un modelo de IA en el dataset MNIST y probarlo con tus propias imágenes.</p>
         </header>
 
-        <main>
-            <!-- SECCIÓN DE PREDICCIÓN INTERACTIVA CON FIREBASE -->
-            <section class="card prediction-section">
-                <h2>¡Prueba la IA en tiempo real!</h2>
-                <p>Sube una imagen de un número manuscrito. La IA predecirá el dígito y podrás guardar la imagen y el resultado en Firebase.</p>
-                <div id="upload-area" class="upload-area">
-                    <p>Haz clic aquí o arrastra una imagen</p>
-                    <input type="file" id="image-upload" accept="image/*" style="display: none;">
-                </div>
-                <img id="image-preview" src="" alt="Vista previa de la imagen" style="display:none;"/>
-                <h3>Predicción de la IA:</h3>
-                <div id="prediction-result">...</div>
-                <button id="save-button" class="action-button" disabled>Guardar Resultado en Firebase</button>
-                <div id="status-message"></div>
-            </section>
-
-            <!-- GRÁFICAS DE PLOTLY -->
-            <section class="card">
-                <h2>Rendimiento del Modelo</h2>
-                <p>Las siguientes gráficas muestran la evolución del modelo durante el entrenamiento, evidenciando el sobreajuste (overfitting).</p>
-                <div class="grid">
-                    <div id="accuracy-chart"></div>
-                    <div id="loss-chart"></div>
-                </div>
-            </section>
-
-            <section class="card">
-                <h2>Análisis de Errores: Matriz de Confusión</h2>
-                <p>La matriz de confusión revela los aciertos (diagonal) y los errores específicos de clasificación del modelo.</p>
-                <div id="confusion-matrix-chart"></div>
-                <p class="final-accuracy">{{ final_accuracy }}</p>
-            </section>
-
-            <section class="card">
-                <h2>Ejemplos de Predicciones</h2>
-                <p>Aciertos (verde) y errores (rojo) del modelo sobre el conjunto de prueba.</p>
-                <div class="image-gallery">
-                    {% for sample in sample_images %}
-                    <div class="sample-item">
-                        <img src="{{ sample.image }}" alt="Dígito {{ sample.true_label }}">
-                        <div class="prediction-label {% if sample.predicted_label == sample.true_label %}prediction-correct{% else %}prediction-incorrect{% endif %}">
-                            Real: {{ sample.true_label }} | Pred: {{ sample.predicted_label }}
-                        </div>
+        <main class="main-grid">
+            <!-- Columna Izquierda: Predicción -->
+            <div class="prediction-column">
+                <section class="card prediction-section">
+                    <h2>¡Prueba la IA en tiempo real!</h2>
+                    <p>Sube una imagen de un número manuscrito. La IA predecirá el dígito y podrás guardar la imagen y el resultado en Firebase.</p>
+                    <div id="upload-area" class="upload-area">
+                        <p>Haz clic aquí o arrastra una imagen</p>
+                        <input type="file" id="image-upload" accept="image/*" style="display: none;">
                     </div>
-                    {% endfor %}
-                </div>
-            </section>
+                    <img id="image-preview" src="" alt="Vista previa de la imagen" style="display:none;"/>
+                    <h3>Predicción de la IA:</h3>
+                    <div id="prediction-result">...</div>
+                    <button id="save-button" class="action-button" disabled>Guardar Resultado en Firebase</button>
+                    <div id="status-message"></div>
+                </section>
+            </div>
 
-            <section class="card">
-                <h2>Detalles Técnicos del Modelo</h2>
-                <h3>Arquitectura</h3>
-                <pre>{{ model_summary }}</pre>
-                <h3>Logs de Entrenamiento</h3>
-                <pre>{% for log in training_logs %}{{ log }}
+            <!-- Columna Derecha: Análisis del Modelo -->
+            <div class="analysis-column">
+                <section class="card">
+                    <h2>Rendimiento del Modelo</h2>
+                    <p>Las siguientes gráficas muestran la evolución del modelo durante el entrenamiento, evidenciando el sobreajuste (overfitting).</p>
+                    <div class="grid">
+                        <div id="accuracy-chart"></div>
+                        <div id="loss-chart"></div>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <h2>Análisis de Errores: Matriz de Confusión</h2>
+                    <p>La matriz de confusión revela los aciertos (diagonal) y los errores específicos de clasificación del modelo.</p>
+                    <div id="confusion-matrix-chart"></div>
+                    <p class="final-accuracy">{{ final_accuracy }}</p>
+                </section>
+
+                <section class="card">
+                    <h2>Ejemplos de Predicciones</h2>
+                    <p>Aciertos (verde) y errores (rojo) del modelo sobre el conjunto de prueba.</p>
+                    <div class="image-gallery">
+                        {% for sample in sample_images %}
+                        <div class="sample-item">
+                            <img src="{{ sample.image }}" alt="Dígito {{ sample.true_label }}">
+                            <div class="prediction-label {% if sample.predicted_label == sample.true_label %}prediction-correct{% else %}prediction-incorrect{% endif %}">
+                                Real: {{ sample.true_label }} | Pred: {{ sample.predicted_label }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <section class="card">
+                    <h2>Detalles Técnicos del Modelo</h2>
+                    <h3>Arquitectura</h3>
+                    <pre>{{ model_summary }}</pre>
+                    <h3>Logs de Entrenamiento</h3>
+                    <pre>{% for log in training_logs %}{{ log }}
 {% endfor %}</pre>
-            </section>
+                </section>
+            </div>
         </main>
     </div>
 
